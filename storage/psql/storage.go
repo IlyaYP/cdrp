@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"runtime"
 
+	"github.com/IlyaYP/cdrp/storage"
 	"github.com/IlyaYP/cdrp/storage/psql/migrations"
 	"github.com/IlyaYP/cdrp/storage/psql/schema"
 	"github.com/uptrace/bun"
@@ -13,6 +14,8 @@ import (
 	"github.com/uptrace/bun/driver/pgdriver"
 	"github.com/uptrace/bun/migrate"
 )
+
+var _ storage.RecordsStorage = (*Storage)(nil)
 
 const (
 	serviceName = "psql"

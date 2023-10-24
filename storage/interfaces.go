@@ -12,5 +12,5 @@ type RecordsStorage interface {
 
 	// CreateRecord creates a new model.Record.
 	// Returns ErrAlreadyExists if user exists.
-	CreateRecord(ctx context.Context, record model.Record) error
+	CreateRecord(ctx context.Context, record model.Record) (model.Record, error)
 }
