@@ -3,6 +3,8 @@ package model
 import (
 	"strconv"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -190,7 +192,7 @@ type Record struct {
 	DateTimeConnect                         time.Time //INTEGER
 	DateTimeDisconnect                      time.Time //INTEGER
 	LastRedirectDn                          string    //VARCHAR(50)
-	Pkid                                    string    //UNIQUEIDENTIFIER
+	Pkid                                    uuid.UUID //UNIQUEIDENTIFIER
 	OriginalCalledPartyNumberPartition      string    //VARCHAR(50)
 	CallingPartyNumberPartition             string    //VARCHAR(50)
 	FinalCalledPartyNumberPartition         string    //VARCHAR(50)
@@ -332,7 +334,7 @@ func NewRecordFromStrSlice(rec []string) (*Record, error) {
 	t1, _ = strconv.Atoi(rec[DateTimeDisconnect])
 	r.DateTimeDisconnect = time.Unix(int64(t1), 0)
 	r.LastRedirectDn = rec[LastRedirectDn]
-	r.Pkid = rec[Pkid]
+	r.Pkid, _ = uuid.Parse(rec[Pkid])
 	r.OriginalCalledPartyNumberPartition = rec[OriginalCalledPartyNumberPartition]
 	r.CallingPartyNumberPartition = rec[CallingPartyNumberPartition]
 	r.FinalCalledPartyNumberPartition = rec[FinalCalledPartyNumberPartition]
