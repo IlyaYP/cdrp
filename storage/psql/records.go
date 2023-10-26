@@ -36,3 +36,13 @@ func (st Storage) CreateRecord(ctx context.Context, record model.Record) (model.
 
 	return obj, nil
 }
+
+// CreateTableRecords creates table records
+func (st Storage) CreateTableRecords(ctx context.Context) error {
+	_, err := st.db.NewCreateTable().Model((*schema.Record)(nil)).Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
