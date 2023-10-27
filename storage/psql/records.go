@@ -46,3 +46,23 @@ func (st Storage) CreateTableRecords(ctx context.Context) error {
 
 	return nil
 }
+
+// DropTableRecords drops table records
+func (st Storage) DropTableRecords(ctx context.Context) error {
+	_, err := st.db.NewDropTable().Model((*schema.Record)(nil)).Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ResetTableRecords drops table records
+func (st Storage) ResetTableRecords(ctx context.Context) error {
+	err := st.db.ResetModel(ctx, (*schema.Record)(nil))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
