@@ -15,6 +15,7 @@ func newDbCmd() *cobra.Command {
 		Short: "DB sub-commands",
 	}
 
+	cmd.AddCommand(newMigrateCmd())
 	cmd.AddCommand(newDbCreateTableCmd())
 	cmd.AddCommand(newDbDropTableCmd())
 	cmd.AddCommand(newDbResetTableCmd())

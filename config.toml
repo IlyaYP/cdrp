@@ -1,5 +1,5 @@
-# App config example.
-
+# Path to CDR files.
+CdrPath = "/tmp/cucm"
 # PostgreSQL storage configuration
 [psql_storage]
   # Connection URL

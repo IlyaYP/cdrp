@@ -52,8 +52,8 @@ func newRootCmd() *cobra.Command {
 	cmd.PersistentFlags().String(flagConfigPath, "./config.toml", "Config file path")
 	cmd.PersistentFlags().Duration(flagOperationTimeout, 30*time.Second, "Operation timeout")
 
-	cmd.AddCommand(newMigrateCmd())
 	cmd.AddCommand(newDbCmd())
+	cmd.AddCommand(newParseCmd())
 
 	return cmd
 }

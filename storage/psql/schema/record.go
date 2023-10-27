@@ -14,7 +14,7 @@ type Record struct {
 	GlobalCallID_callManagerId              int       `bun:"type:integer"`
 	GlobalCallID_callId                     int       `bun:"type:integer"`
 	OrigLegCallIdentifier                   int       `bun:"type:integer"`
-	DateTimeOrigination                     time.Time `bun:"type:integer"`
+	DateTimeOrigination                     time.Time //`bun:"type:integer"`
 	OrigNodeId                              int       `bun:"type:integer"`
 	OrigSpan                                int       `bun:"type:integer"`
 	OrigIpAddr                              int       `bun:"type:integer"`
@@ -57,10 +57,10 @@ type Record struct {
 	DestVideoTransportAddress_Port          int       `bun:"type:integer"`
 	DestRSVPAudioStat                       string    `bun:"type:varchar(64)"`
 	DestRSVPVideoStat                       string    `bun:"type:varchar(64)"`
-	DateTimeConnect                         time.Time `bun:"type:integer"`
-	DateTimeDisconnect                      time.Time `bun:"type:integer"`
+	DateTimeConnect                         time.Time //`bun:"type:integer"`
+	DateTimeDisconnect                      time.Time //`bun:"type:integer"`
 	LastRedirectDn                          string    `bun:"type:varchar(50)"`
-	Pkid                                    uuid.UUID `bun:"type:uuid"` //UNIQUEIDENTIFIER
+	Pkid                                    uuid.UUID `bun:"type:uuid,pk"` //UNIQUEIDENTIFIER
 	OriginalCalledPartyNumberPartition      string    `bun:"type:varchar(50)"`
 	CallingPartyNumberPartition             string    `bun:"type:varchar(50)"`
 	FinalCalledPartyNumberPartition         string    `bun:"type:varchar(50)"`

@@ -8,6 +8,7 @@ import (
 
 // Config combines sub-configs for all services, storages and providers.
 type Config struct {
+	CdrPath string
 	// UserService user.Config `mapstructure:"user_service"`
 	PSQLStorage psql.Config `mapstructure:"psql_storage"`
 }
