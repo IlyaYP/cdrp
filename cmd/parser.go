@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"encoding/csv"
+	"errors"
 	"io"
 	"os"
 	"path"
@@ -49,6 +50,9 @@ func newParseCmd() *cobra.Command {
 				return err
 			}
 
+			numFiles := len(files)
+			log.Printf("found %v files", numFiles)
+
 			for _, file := range files {
 				if file.IsDir() {
 					continue
@@ -57,12 +61,12 @@ func newParseCmd() *cobra.Command {
 				filename := path.Join(config.CdrPath, file.Name())
 				err := parseFile(ctx, filename, st)
 				if err != nil {
-					log.Err(err).Msgf("parse file %s", filename)
+					log.Error().Err(err).Msgf("parse file %s", filename)
 					continue
 				}
 
 				// if err := os.Remove(filename); err != nil {
-				// 	log.Err(err).Msgf("remove file %s", filename)
+				// 	log.Error().Err(err).Msgf("remove file %s", filename)
 				// }
 			}
 
@@ -81,6 +85,21 @@ func parseFile(ctx context.Context, filename string, st storage.RecordsStorage) 
 	defer f.Close()
 
 	csvReader := csv.NewReader(f)
+
+	// Read first two rows to check if it CDR format file
+	rec, err := csvReader.Read()
+	if err != nil {
+		return err
+	}
+	if !model.CompareHeader(rec) {
+		err := errors.New("wrong file format")
+		return err
+	}
+	_, err = csvReader.Read()
+	if err != nil {
+		return err
+	}
+
 	for {
 		rec, err := csvReader.Read()
 		if err == io.EOF {
@@ -92,14 +111,13 @@ func parseFile(ctx context.Context, filename string, st storage.RecordsStorage) 
 
 		record, err := model.NewRecordFromStrSlice(rec)
 		if err != nil {
-			log.Err(err).Msg("NewRecordFromStrSlice")
+			log.Error().Err(err).Msgf("NewRecordFromStrSlice:%s", filename)
 			continue
 		}
 
 		if _, err := st.CreateRecord(ctx, *record); err != nil {
-			log.Err(err).Msg("CreateRecord")
+			log.Debug().Err(err).Msgf("CreateRecord:%s", record.Pkid)
 		}
-
 	}
 
 	return nil

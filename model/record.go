@@ -1,11 +1,146 @@
 package model
 
 import (
+	"errors"
 	"strconv"
 	"time"
 
 	"github.com/google/uuid"
 )
+
+var CdrHeader = [...]string{
+	"cdrRecordType",
+	"globalCallID_callManagerId",
+	"globalCallID_callId",
+	"origLegCallIdentifier",
+	"dateTimeOrigination",
+	"origNodeId",
+	"origSpan",
+	"origIpAddr",
+	"callingPartyNumber",
+	"callingPartyUnicodeLoginUserID",
+	"origCause_location",
+	"origCause_value",
+	"origPrecedenceLevel",
+	"origMediaTransportAddress_IP",
+	"origMediaTransportAddress_Port",
+	"origMediaCap_payloadCapability",
+	"origMediaCap_maxFramesPerPacket",
+	"origMediaCap_g723BitRate",
+	"origVideoCap_Codec",
+	"origVideoCap_Bandwidth",
+	"origVideoCap_Resolution",
+	"origVideoTransportAddress_IP",
+	"origVideoTransportAddress_Port",
+	"origRSVPAudioStat",
+	"origRSVPVideoStat",
+	"destLegIdentifier",
+	"destNodeId",
+	"destSpan",
+	"destIpAddr",
+	"originalCalledPartyNumber",
+	"finalCalledPartyNumber",
+	"finalCalledPartyUnicodeLoginUserID",
+	"destCause_location",
+	"destCause_value",
+	"destPrecedenceLevel",
+	"destMediaTransportAddress_IP",
+	"destMediaTransportAddress_Port",
+	"destMediaCap_payloadCapability",
+	"destMediaCap_maxFramesPerPacket",
+	"destMediaCap_g723BitRate",
+	"destVideoCap_Codec",
+	"destVideoCap_Bandwidth",
+	"destVideoCap_Resolution",
+	"destVideoTransportAddress_IP",
+	"destVideoTransportAddress_Port",
+	"destRSVPAudioStat",
+	"destRSVPVideoStat",
+	"dateTimeConnect",
+	"dateTimeDisconnect",
+	"lastRedirectDn",
+	"pkid",
+	"originalCalledPartyNumberPartition",
+	"callingPartyNumberPartition",
+	"finalCalledPartyNumberPartition",
+	"lastRedirectDnPartition",
+	"duration",
+	"origDeviceName",
+	"destDeviceName",
+	"origCallTerminationOnBehalfOf",
+	"destCallTerminationOnBehalfOf",
+	"origCalledPartyRedirectOnBehalfOf",
+	"lastRedirectRedirectOnBehalfOf",
+	"origCalledPartyRedirectReason",
+	"lastRedirectRedirectReason",
+	"destConversationId",
+	"globalCallId_ClusterID",
+	"joinOnBehalfOf",
+	"comment",
+	"authCodeDescription",
+	"authorizationLevel",
+	"clientMatterCode",
+	"origDTMFMethod",
+	"destDTMFMethod",
+	"callSecuredStatus",
+	"origConversationId",
+	"origMediaCap_Bandwidth",
+	"destMediaCap_Bandwidth",
+	"authorizationCodeValue",
+	"outpulsedCallingPartyNumber",
+	"outpulsedCalledPartyNumber",
+	"origIpv4v6Addr",
+	"destIpv4v6Addr",
+	"origVideoCap_Codec_Channel2",
+	"origVideoCap_Bandwidth_Channel2",
+	"origVideoCap_Resolution_Channel2",
+	"origVideoTransportAddress_IP_Channel2",
+	"origVideoTransportAddress_Port_Channel2",
+	"origVideoChannel_Role_Channel2",
+	"destVideoCap_Codec_Channel2",
+	"destVideoCap_Bandwidth_Channel2",
+	"destVideoCap_Resolution_Channel2",
+	"destVideoTransportAddress_IP_Channel2",
+	"destVideoTransportAddress_Port_Channel2",
+	"destVideoChannel_Role_Channel2",
+	"IncomingProtocolID",
+	"IncomingProtocolCallRef",
+	"OutgoingProtocolID",
+	"OutgoingProtocolCallRef",
+	"currentRoutingReason",
+	"origRoutingReason",
+	"lastRedirectingRoutingReason",
+	"huntPilotPartition",
+	"huntPilotDN",
+	"calledPartyPatternUsage",
+	"IncomingICID",
+	"IncomingOrigIOI",
+	"IncomingTermIOI",
+	"OutgoingICID",
+	"OutgoingOrigIOI",
+	"OutgoingTermIOI",
+	"outpulsedOriginalCalledPartyNumber",
+	"outpulsedLastRedirectingNumber",
+	"wasCallQueued",
+	"totalWaitTimeInQueue",
+	"callingPartyNumber_uri",
+	"originalCalledPartyNumber_uri",
+	"finalCalledPartyNumber_uri",
+	"lastRedirectDn_uri",
+	"mobileCallingPartyNumber",
+	"finalMobileCalledPartyNumber",
+	"origMobileDeviceName",
+	"destMobileDeviceName",
+	"origMobileCallDuration",
+	"destMobileCallDuration",
+	"mobileCallType",
+	"originalCalledPartyPattern",
+	"finalCalledPartyPattern",
+	"lastRedirectingPartyPattern",
+	"huntPilotPattern",
+	"origDeviceType",
+	"destDeviceType",
+}
 
 const (
 	CdrRecordType = iota
@@ -139,6 +274,7 @@ const (
 	HuntPilotPattern
 	OrigDeviceType
 	DestDeviceType
+	RecordLen
 )
 
 type Record struct {
@@ -275,12 +411,31 @@ type Record struct {
 	DestDeviceType                          string    //VARCHAR(100)
 }
 
+func CompareHeader(h []string) bool {
+	if len(h) != len(CdrHeader) {
+		return false
+	}
+
+	for i, v := range h {
+		if v != CdrHeader[i] {
+			return false
+		}
+	}
+	return true
+}
+
 func NewRecordFromStrSlice(rec []string) (*Record, error) {
+	if len(rec) != RecordLen {
+		return nil, errors.New("wrong slice")
+	}
 	r := Record{}
 	var err error
 	r.CdrRecordType, err = strconv.Atoi(rec[CdrRecordType])
 	if err != nil {
 		return nil, err
+	}
+	if r.CdrRecordType != 1 {
+		return nil, errors.New("wrong record type")
 	}
 	r.GlobalCallID_callManagerId, _ = strconv.Atoi(rec[GlobalCallID_callManagerId])
 	r.GlobalCallID_callId, _ = strconv.Atoi(rec[GlobalCallID_callId])
