@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/csv"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path"
@@ -15,6 +16,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	flagDeleteFiles = "delete"
+)
+
 // newParseCmd parses CDR files
 func newParseCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -24,6 +29,12 @@ func newParseCmd() *cobra.Command {
 			// Init
 			config := common.GetConfigFromCmdCtx(cmd)
 			timeout := common.GetTimeoutToCmdCtx(cmd)
+
+			deleteFlag, err := cmd.Flags().GetBool(flagDeleteFiles)
+			if err != nil {
+				return fmt.Errorf("app initialization: reading flag %s: %w", flagOperationTimeout, err)
+			}
+			log.Printf("deleteFlag is %v", deleteFlag)
 
 			st, err := config.BuildPsqlStorage()
 			if err != nil {
@@ -39,10 +50,6 @@ func newParseCmd() *cobra.Command {
 			ctx, ctxCancel := context.WithTimeout(context.Background(), timeout)
 			defer ctxCancel()
 
-			// if err := st.CreateTableRecords(ctx); err != nil {
-			// 	return err
-			// }
-
 			log.Print("parser started in ", config.CdrPath)
 
 			files, err := os.ReadDir(config.CdrPath)
@@ -54,25 +61,35 @@ func newParseCmd() *cobra.Command {
 			log.Printf("found %v files", numFiles)
 
 			for _, file := range files {
-				if file.IsDir() {
-					continue
-				}
+				select {
+				case <-ctx.Done():
+					log.Error().Err(ctx.Err()).Msg("Exiting")
+					return nil
+				default:
+					if file.IsDir() {
+						continue
+					}
 
-				filename := path.Join(config.CdrPath, file.Name())
-				err := parseFile(ctx, filename, st)
-				if err != nil {
-					log.Error().Err(err).Msgf("parse file %s", filename)
-					continue
-				}
+					filename := path.Join(config.CdrPath, file.Name())
+					err := parseFile(ctx, filename, st)
+					if err != nil {
+						log.Error().Err(err).Msgf("parse file %s", filename)
+						continue
+					}
 
-				// if err := os.Remove(filename); err != nil {
-				// 	log.Error().Err(err).Msgf("remove file %s", filename)
-				// }
+					if deleteFlag {
+						if err := os.Remove(filename); err != nil {
+							log.Error().Err(err).Msgf("remove file %s", filename)
+						}
+					}
+				}
 			}
 
 			return nil
 		},
 	}
+
+	cmd.Flags().BoolP(flagDeleteFiles, "d", false, "Delete parsed files")
 
 	return cmd
 }
