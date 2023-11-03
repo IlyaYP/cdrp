@@ -1,7 +1,8 @@
 select date_time_origination, calling_party_number, original_called_party_number, duration, orig_cause_value, 
 orig_device_name, dest_device_name
 from records
-order by date_time_origination;
+order by date_time_origination
+limit 100;
 
 
 -- Table: public.partition
@@ -39,8 +40,8 @@ FROM PUBLIC."records" AS RECTAB
 LEFT OUTER JOIN PUBLIC."partition" AS PARTTAB ON RECTAB."calling_party_number_partition" = PARTTAB."Partition_name"
 LEFT OUTER JOIN PUBLIC."partition" AS PARTTAB2 ON RECTAB."final_called_party_number_partition" = PARTTAB2."Partition_name" --    where calling_party_number = '414'
 
---    where PartTab."ID" || RecTab.calling_Party_Number = '001220' -- отбор по исходящему номеру
-WHERE PARTTAB2."ID" || RECTAB.FINAL_CALLED_PARTY_NUMBER = '001105' -- отбор по входящему номеру
+WHERE PARTTAB."ID" || RECTAB.CALLING_PARTY_NUMBER = '001460' -- отбор по исходящему номеру
+ --WHERE PARTTAB2."ID" || RECTAB.FINAL_CALLED_PARTY_NUMBER = '001460' -- отбор по входящему номеру
 
 	AND DURATION > 0 --    where final_Called_Party_Number = '220'
 

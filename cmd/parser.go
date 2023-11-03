@@ -11,6 +11,7 @@ import (
 
 	"github.com/IlyaYP/cdrp/cmd/common"
 	"github.com/IlyaYP/cdrp/model"
+	"github.com/IlyaYP/cdrp/pkg"
 	"github.com/IlyaYP/cdrp/storage"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -34,7 +35,10 @@ func newParseCmd() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("app initialization: reading flag %s: %w", flagOperationTimeout, err)
 			}
+
 			log.Printf("deleteFlag is %v", deleteFlag)
+			log.Printf("CdrPath is %s", config.CdrPath)
+			log.Printf("DSN is %s", config.PSQLStorage.DSN)
 
 			st, err := config.BuildPsqlStorage()
 			if err != nil {
@@ -133,6 +137,10 @@ func parseFile(ctx context.Context, filename string, st storage.RecordsStorage) 
 		}
 
 		if _, err := st.CreateRecord(ctx, *record); err != nil {
+			if err != pkg.ErrAlreadyExists {
+				log.Error().Err(err).Msgf("CreateRecord:%s", record.Pkid)
+				return err
+			}
 			log.Debug().Err(err).Msgf("CreateRecord:%s", record.Pkid)
 		}
 	}
