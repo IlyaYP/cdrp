@@ -1,6 +1,16 @@
 # Path to CDR files.
-CdrPath = "/tmp/cucm"
+path = "/tmp/cucm"
+
 # PostgreSQL storage configuration
 [psql_storage]
-  # Connection URL
-  dsn = "postgres://postgres:postgres@localhost:5432/cdr?sslmode=disable"
+# Connection URL
+dsn = "postgres://postgres:postgres@localhost:5432/cdr?sslmode=disable"
+
+# CUCM AXL configuration
+[cucm_axl]
+cucm = "ucm1"        # FQDN or IP of CUCM Publisher / First Node (required)
+user = "axl"         # AXL username (required)
+pass = "axl123"      # AXL password (required)
+insec = true        # Skip certificate validation
+schema = "12.5"      # AXL schema version
+dump = false         # dump request and response headers and body
